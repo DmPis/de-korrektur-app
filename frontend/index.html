@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DE PDF→Text Korrektur</title>
+  <style>
+    body{font-family:system-ui,Arial;margin:24px}
+    .row{display:flex;gap:24px;flex-wrap:wrap}
+    .col{flex:1;min-width:320px}
+    textarea{width:100%;height:280px}
+    mark{background:#ffeb3b}
+  </style>
+</head>
+<body>
+  <h1>DE PDF→Text Korrektur</h1>
+  <p>Загрузите PDF, чтобы получить чистый текст, версию с подсветкой ошибок и DOCX-экспорт.</p>
+  <input id="pdf" type="file" accept="application/pdf" />
+  <button id="run">Verarbeiten</button>
+  <div id="status"></div>
+  <div class="row">
+    <div class="col">
+      <h2>Reintext (bereinigt)</h2>
+      <textarea id="clean" readonly></textarea>
+    </div>
+    <div class="col">
+      <h2>Mit Fehler‑Markierung</h2>
+      <div id="marked" style="border:1px solid #ccc;padding:12px;min-height:280px;white-space:pre-wrap"></div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <h2>Erklärung</h2>
+      <ul id="explain"></ul>
+    </div>
+    <div class="col">
+      <h2>Fehlerstatistik</h2>
+      <pre id="stats"></pre>
+      <a id="docx" href="#" download>DOCX export</a>
+    </div>
+  </div>
+<script>
+const runBtn = document.getElementById('run');
+const fileInput = document.getElementById('pdf');
+const statusEl = document.getElementById('status');
+const cleanEl = document.getElementById('clean');
+const markedEl = document.getElementById('marked');
+const explainEl = document.getElementById('explain');
+const statsEl = document.getElementById('stats');
+const docxEl = document.getElementById('docx');
+
+runBtn.onclick = async () => {
+  const f = fileInput.files[0];
+  if(!f){ alert('PDF auswählen'); return; }
+  statusEl.textContent = 'Verarbeite…';
+  const fd = new FormData();
+  fd.append('file', f);
+  const res = await fetch('/process', {method:'POST', body: fd});
+  const data = await res.json();
+  cleanEl.value = data.clean_text || '';
+  markedEl.innerHTML = data.marked_html || '';
+  explainEl.innerHTML = (data.explanations||[]).map(x=>`<li><b>${x.rule}</b>: ${x.hint} — <i>${x.example_fix}</i></li>`).join('');
+  statsEl.textContent = JSON.stringify(data.stats, null, 2);
+  docxEl.href = `/export/docx/${data.job_id}`;
+  statusEl.textContent = 'Fertig';
+};
+</script>
+</body>
+</html>

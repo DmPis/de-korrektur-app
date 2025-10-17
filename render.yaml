@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: de-korrektur-api
+    env: docker
+    plan: free
+    dockerfilePath: backend/Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: LANGUAGETOOL_URL
+        value: http://languagetool:8010
+    healthCheckPath: /docs
+
+  - type: web
+    name: languagetool
+    env: docker
+    plan: free
+    dockerfilePath: languagetool/Dockerfile
+    autoDeploy: true
+    healthCheckPath: /

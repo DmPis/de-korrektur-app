@@ -1,0 +1,14 @@
+{
+  "framework": "none",
+  "outputDirectory": "frontend",
+  "rewrites": [
+    {
+      "source": "/process",
+      "destination": "https://YOUR-API-URL/process"
+    },
+    {
+      "source": "/export/docx/(.*)",
+      "destination": "https://YOUR-API-URL/export/docx/$1"
+    }
+  ]
+}

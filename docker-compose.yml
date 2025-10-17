@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  api:
+    build: ./backend
+    container_name: de-korrektur-api
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - languagetool
+
+  languagetool:
+    image: silviof/docker-languagetool:latest
+    container_name: languagetool
+    environment:
+      - Java_Xms=128m
+      - Java_Xmx=1024m
+    ports:
+      - "8010:8010"
+    command: ["/bin/sh","-c","java -cp /LanguageTool/* org.languagetool.server.HTTPServer --port 8010 --public --allow-origin '*' "]
